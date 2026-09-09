@@ -74,7 +74,7 @@
   - `xplayer-<version>-universal.apk` — fallback if you're unsure
 - **Windows**: `xplayer-windows-x64.zip`
 - **macOS**: [Download on the App Store](https://apps.apple.com/app/id6783271337) (recommended); or `xplayer-macos.dmg` (see FAQ for first launch)
-- **Linux**: `xplayer-linux-x64.tar.gz`
+- **Linux**: `xplayer-linux-x64.tar.gz` / `xplayer-linux-x64.AppImage` (`./xplayer-linux-x64.AppImage --appimage-extract` for a directory you can drop into Flatpak)
 - **iOS / iPad**: [Download on the App Store](https://apps.apple.com/app/id6783271337) (recommended); or the [TestFlight beta](https://testflight.apple.com/join/BD5BMpqe) / the unsigned ipa in Releases
 
 </details>

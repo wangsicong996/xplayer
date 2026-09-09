@@ -74,7 +74,7 @@
   - `xplayer-<版本>-universal.apk` —— 不确定架构时的通用兜底包
 - **Windows**：`xplayer-windows-x64.zip`
 - **macOS**：[App Store 下载](https://apps.apple.com/app/id6783271337)（推荐）；或 `xplayer-macos.dmg`（首次打开见常见问题）
-- **Linux**：`xplayer-linux-x64.tar.gz`
+- **Linux**：`xplayer-linux-x64.tar.gz` / `xplayer-linux-x64.AppImage`（`./xplayer-linux-x64.AppImage --appimage-extract` 解压后可放进 Flatpak）
 - **iOS / iPad**：[App Store 下载](https://apps.apple.com/app/id6783271337)（推荐）；或 [TestFlight 公测版](https://testflight.apple.com/join/BD5BMpqe)、Releases 里的未签名 ipa 自行签名
 
 </details>

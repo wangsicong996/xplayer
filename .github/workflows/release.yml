@@ -83,17 +83,7 @@ jobs:
           cache: true
 
       - name: Update pubspec.yaml version
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          echo "Updating pubspec.yaml version to: $VERSION"
-          # 去掉 v 前缀
-          CLEAN_VERSION=${VERSION#v}
-          # 使用 GitHub run number 作为构建号
-          BUILD_NUMBER=${{ github.run_number }}
-          # 更新 pubspec.yaml
-          sed -i "s/^version: .*/version: ${CLEAN_VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          echo "Updated version in pubspec.yaml:"
-          grep "^version:" pubspec.yaml
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -201,14 +191,7 @@ jobs:
 
       - name: Update pubspec.yaml version
         shell: bash
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          echo "Updating pubspec.yaml version to: $VERSION"
-          CLEAN_VERSION=${VERSION#v}
-          BUILD_NUMBER=${{ github.run_number }}
-          sed -i "s/^version: .*/version: ${CLEAN_VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          echo "Updated version in pubspec.yaml:"
-          grep "^version:" pubspec.yaml
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -314,14 +297,7 @@ jobs:
         run: flutter config --enable-macos-desktop
 
       - name: Update pubspec.yaml version
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          echo "Updating pubspec.yaml version to: $VERSION"
-          CLEAN_VERSION=${VERSION#v}
-          BUILD_NUMBER=${{ github.run_number }}
-          sed -i "" "s/^version: .*/version: ${CLEAN_VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          echo "Updated version in pubspec.yaml:"
-          grep "^version:" pubspec.yaml
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -398,15 +374,11 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Update pubspec.yaml version
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
+
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Update pubspec.yaml version
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          CLEAN_VERSION=${VERSION#v}
-          sed -i "" "s/^version: .*/version: ${CLEAN_VERSION}+${{ github.run_number }}/" pubspec.yaml
-          grep "^version:" pubspec.yaml
 
       - name: Import certificates + provisioning profile
         env:
@@ -548,16 +520,11 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Update pubspec.yaml version
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
+
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Update pubspec.yaml version
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          CLEAN_VERSION=${VERSION#v}
-          BUILD_NUMBER=${{ github.run_number }}
-          sed -i "" "s/^version: .*/version: ${CLEAN_VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          grep "^version:" pubspec.yaml
 
       - name: Setup iOS signing from secrets
         env:
@@ -740,7 +707,7 @@ jobs:
           echo "Uploaded to TestFlight"
 
   linux:
-    name: Linux (tar.gz)
+    name: Linux (tar.gz + AppImage)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -769,7 +736,7 @@ jobs:
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: Install Linux build dependencies
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev squashfs-tools file
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -782,14 +749,7 @@ jobs:
         run: flutter config --enable-linux-desktop
 
       - name: Update pubspec.yaml version
-        run: |
-          VERSION='${{ steps.meta.outputs.tag_name }}'
-          echo "Updating pubspec.yaml version to: $VERSION"
-          CLEAN_VERSION=${VERSION#v}
-          BUILD_NUMBER=${{ github.run_number }}
-          sed -i "s/^version: .*/version: ${CLEAN_VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          echo "Updated version in pubspec.yaml:"
-          grep "^version:" pubspec.yaml
+        run: bash .github/scripts/set_pubspec_version.sh '${{ steps.meta.outputs.tag_name }}' '${{ github.run_number }}'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -797,19 +757,23 @@ jobs:
       - name: Build Linux (release)
         run: flutter build linux --release
 
-      - name: Package Linux tar.gz
+      - name: Package Linux tar.gz + AppImage
         run: |
           set -euo pipefail
-          cd build/linux/x64/release/bundle
-          tar -czf ../../../xplayer-linux-x64.tar.gz *
-          cd -
+          OUT=dist-linux
+          mkdir -p "$OUT"
+          tar -C build/linux/x64/release/bundle -czf "$OUT/xplayer-linux-x64.tar.gz" .
+          bash linux/packaging/build_appimage.sh \
+            build/linux/x64/release/bundle \
+            "$OUT/xplayer-linux-x64.AppImage"
+          ls -lh "$OUT"
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux
           if-no-files-found: error
-          path: build/linux/xplayer-linux-x64.tar.gz
+          path: dist-linux/*
 
   release:
     name: Create GitHub Release

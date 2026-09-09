@@ -1,0 +1,7 @@
+#!/bin/sh
+# Flutter Linux bundle: binary, lib/, data/ 必须保持相对位置。
+# AppImage 解压后（--appimage-extract → squashfs-root）可直接放进 Flatpak。
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+export LD_LIBRARY_PATH="${HERE}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$HERE/xplayer" "$@"

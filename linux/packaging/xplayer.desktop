@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=XPlayer
+Comment=Cross-platform IPTV/M3U player
+Exec=xplayer
+Icon=xplayer
+Type=Application
+Categories=AudioVideo;Video;Player;TV;
+Terminal=false
+StartupWMClass=xplayer
+StartupNotify=true
